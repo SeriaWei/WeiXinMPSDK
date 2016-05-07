@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2015 Senparc
+    Copyright (C) 2016 Senparc
     
     文件名：CardCreateData.cs
     文件功能描述：所有类型的卡券数据
@@ -12,13 +12,10 @@
     
     修改标识：Senparc - 20150323
     修改描述：添加会议门票类型
+    
+    修改标识：hello2008zj - 20160502
+    修改描述：v13.7.8 添加 Card_MemberCardData.background_pic_url
 ----------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Senparc.Weixin.MP.Entities;
 
 namespace Senparc.Weixin.MP.AdvancedAPIs.Card
 {
@@ -131,6 +128,16 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.Card
         /// </summary>
         public bool supply_balance { get; set; }
         /// <summary>
+        /// 设置为true时用户领取会员卡后系统自动将其激活，无需调用激活接口。
+        /// 非必填
+        /// </summary>
+        public bool auto_activate { get; set; }
+        /// <summary>
+        /// 设置为true时会员卡支持一键激活，不允许同时传入activate_url字段，否则设置wx_activate失效。
+        /// 非必填
+        /// </summary>
+        public bool wx_activate { get; set; }
+        /// <summary>
         /// 积分清零规则
         /// 非必填
         /// </summary>
@@ -158,11 +165,76 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.Card
         /// 激活会员卡的url，与“bind_old_card_url”字段二选一必填。
         /// </summary>
         public string activate_url { get; set; }
+        /// <summary>
+        /// 设置跳转外链查看积分详情。仅适用于积分无法通过激活接口同步的情况下使用该字段。
+        /// 非必填
+        /// </summary>
+        public string bonus_url { get; set; }
+        /// <summary>
+        /// 设置跳转外链查看余额详情。仅适用于余额无法通过激活接口同步的情况下使用该字段。
+        /// 非必填
+        /// </summary>
+        public string balance_url { get; set; }
+        /// <summary>
+        /// 自定义会员信息类目，会员卡激活后显示。
+        /// 非必填
+        /// </summary>
+        public CustomField custom_field1 { get; set; }
+        /// <summary>
+        /// 自定义会员信息类目，会员卡激活后显示。
+        /// 非必填
+        /// </summary>
+        public CustomField custom_field2 { get; set; }
+        /// <summary>
+        /// 自定义会员信息类目，会员卡激活后显示。
+        /// 非必填
+        /// </summary>
+        public CustomField custom_field3 { get; set; }
+        /// <summary>
+        /// 自定义会员信息类目，会员卡激活后显示
+        /// 非必填
+        /// </summary>
+        public CustomCell custom_cell1 { get; set; }
+        /// <summary>
+        /// 会员卡背景图片，非必填
+        /// </summary>
+        public string background_pic_url { get; set; }
 
         public Card_MemberCardData()
             : base(CardType.MEMBER_CARD)
         {
         }
+    }
+
+    public class CustomField
+    {
+        /// <summary>
+        /// 会员信息类目名称。FIELD_NAME_TYPE_LEVEL等级；FIELD_NAME_TYPE_COUPON优惠券；FIELD_NAME_TYPE_STAMP印花；FIELD_NAME_TYPE_DISCOUNT折扣；FIELD_NAME_TYPE_ACHIEVEMEN成就；FIELD_NAME_TYPE_MILEAGE里程。
+        /// </summary>
+        public MemberCard_CustomField_NameType name_type { get; set; }
+        /// <summary>
+        /// 点击类目跳转外链url
+        /// </summary>
+        public string url { get; set; }
+    }
+
+    public class CustomCell
+    {
+        /// <summary>
+        /// 入口名称
+        /// 必填
+        /// </summary>
+        public string name { get; set; }
+        /// <summary>
+        /// 入口右侧提示语，6个汉字内
+        /// 必填
+        /// </summary>
+        public string tips { get; set; }
+        /// <summary>
+        /// 入口跳转链接
+        /// 必填
+        /// </summary>
+        public string url { get; set; }
     }
 
     /// <summary>

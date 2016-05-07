@@ -1,22 +1,26 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2015 Senparc
-    
+    Copyright (C) 2016 Senparc
+
     文件名：ShakeAroundApi.cs
     文件功能描述：摇一摇周边接口
-    
-    
+
+
     创建标识：Senparc - 20150512
+
+    修改标识：Senparc - 20160216
+    修改描述：添加 查询设备与页面的关联关系 接口
+
+    修改标识：Senparc - 20160424
+    修改描述：v13.7.5 添加 ShakeAroundApi.DeviceApplyStatus 接口
 ----------------------------------------------------------------*/
 
 /*
     API：http://mp.weixin.qq.com/wiki/15/b9e012f917e3484b7ed02771156411f3.html
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Senparc.Weixin.Entities;
+using Senparc.Weixin.HttpUtility;
 using Senparc.Weixin.MP.AdvancedAPIs.ShakeAround;
 using Senparc.Weixin.MP.CommonAPIs;
 
@@ -27,6 +31,40 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
     /// </summary>
     public static class ShakeAroundApi
     {
+        /// <summary>
+        /// 申请开通功能
+        /// </summary>
+        /// <param name="accessTokenOrAppId"></param>
+        /// <param name="data"></param>
+        /// <param name="timeOut"></param>
+        /// <returns></returns>
+        public static WxJsonResult Register(string accessTokenOrAppId, RegisterData data, int timeOut = Config.TIME_OUT)
+        {
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+            {
+                string url = string.Format("https://api.weixin.qq.com/shakearound/account/register?access_token={0}", accessToken.AsUrlData());
+
+                return CommonJsonSend.Send<WxJsonResult>(null, url, data, CommonJsonSendType.POST, timeOut);
+
+            }, accessTokenOrAppId);
+        }
+
+        /// <summary>
+        /// 查询审核状态
+        /// </summary>
+        /// <param name="accessTokenOrAppId"></param>
+        /// <returns></returns>
+        public static GetAuditStatusResultJson GetAuditStatus(string accessTokenOrAppId)
+        {
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+            {
+                string url = string.Format("https://api.weixin.qq.com/shakearound/account/auditstatus?access_token={0}", accessToken.AsUrlData());
+
+                return Get.GetJson<GetAuditStatusResultJson>(url);
+
+            }, accessTokenOrAppId);
+        }
+
         /// <summary>
         /// 申请设备ID
         /// </summary>
@@ -41,7 +79,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                string url = string.Format("https://api.weixin.qq.com/shakearound/device/applyid?access_token={0}", accessToken);
+                string url = string.Format("https://api.weixin.qq.com/shakearound/device/applyid?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -52,6 +90,31 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
                 };
 
                 return CommonJsonSend.Send<DeviceApplyResultJson>(null, url, data, CommonJsonSendType.POST, timeOut);
+
+            }, accessTokenOrAppId);
+        }
+
+
+        /// <summary>
+        /// 查询设备ID申请审核状态
+        /// 接口说明 查询设备ID申请的审核状态。若单次申请的设备ID数量小于等于500个，系统会进行快速审核；若单次申请的设备ID数量大于500个，则在三个工作日内完成审核。
+        /// </summary>
+        /// <param name="accessTokenOrAppId">调用接口凭证</param>
+        /// <param name="appId">批次ID，申请设备ID时所返回的批次ID</param>
+        /// <param name="timeOut"></param>
+        /// <returns></returns>
+        public static GetDeviceStatusResultJson DeviceApplyStatus(string accessTokenOrAppId, int appId,int timeOut = Config.TIME_OUT)
+        {
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+            {
+                string url = string.Format("https://api.weixin.qq.com/shakearound/device/applystatus?access_token={0}", accessToken.AsUrlData());
+
+                var data = new
+                {
+                    apply_id = appId,
+                };
+
+                return CommonJsonSend.Send<GetDeviceStatusResultJson>(null, url, data, CommonJsonSendType.POST, timeOut);
 
             }, accessTokenOrAppId);
         }
@@ -69,12 +132,11 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         /// <param name="comment"></param>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        public static WxJsonResult DeviceUpdate(string accessTokenOrAppId, long deviceId, long uuId, string major, long minor, string comment, int timeOut = Config.TIME_OUT)
+        public static WxJsonResult DeviceUpdate(string accessTokenOrAppId, long deviceId, string uuId, long major, long minor, string comment, int timeOut = Config.TIME_OUT)
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                string url = string.Format("https://api.weixin.qq.com/shakearound/device/update?access_token={0}",
-                    accessToken);
+                string url = string.Format("https://api.weixin.qq.com/shakearound/device/update?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -106,12 +168,11 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         /// <param name="poiId">Poi_id 的说明改为：设备关联的门店ID，关联门店后，在门店1KM的范围内有优先摇出信息的机会。</param>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        public static WxJsonResult DeviceBindLocatoin(string accessTokenOrAppId, long deviceId, long uuId, string major, long minor, long poiId, int timeOut = Config.TIME_OUT)
+        public static WxJsonResult DeviceBindLocatoin(string accessTokenOrAppId, long deviceId, string uuId, long major, long minor, long poiId, int timeOut = Config.TIME_OUT)
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                string url = string.Format("https://api.weixin.qq.com/shakearound/device/bindlocation?access_token={0}",
-                    accessToken);
+                string url = string.Format("https://api.weixin.qq.com/shakearound/device/bindlocation?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -222,10 +283,10 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/material/add?access_token={0}", accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/material/add?access_token={0}", accessToken.AsUrlData());
                 var fileDictionary = new Dictionary<string, string>();
                 fileDictionary["media"] = file;
-                return HttpUtility.Post.PostFileGetJson<UploadImageResultJson>(url, null, fileDictionary, null, timeOut: timeOut);
+                return Post.PostFileGetJson<UploadImageResultJson>(url, null, fileDictionary, null, timeOut: timeOut);
 
             }, accessTokenOrAppId);
         }
@@ -246,7 +307,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/page/add?access_token={0}", accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/page/add?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -279,7 +340,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/page/update?access_token={0}", accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/page/update?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -308,7 +369,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         /// <param name="pageIds">指定页面的Id数组</param>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        public static SearchPages_Data_Page SearchPagesByPageId(string accessTokenOrAppId, long[] pageIds,
+        public static SearchPagesResultJson SearchPagesByPageId(string accessTokenOrAppId, long[] pageIds,
             int timeOut = Config.TIME_OUT)
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
@@ -318,7 +379,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
                     page_ids = pageIds
                 };
 
-                return CommonJsonSend.Send<SearchPages_Data_Page>(accessToken, searchPageUrl, data, CommonJsonSendType.POST,
+                return CommonJsonSend.Send<SearchPagesResultJson>(accessToken, searchPageUrl, data, CommonJsonSendType.POST,
                     timeOut);
 
             }, accessTokenOrAppId);
@@ -332,7 +393,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         /// <param name="count"></param>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        public static SearchPages_Data_Page SearchPagesByRange(string accessTokenOrAppId, int begin, int count,
+        public static SearchPagesResultJson SearchPagesByRange(string accessTokenOrAppId, int begin, int count,
             int timeOut = Config.TIME_OUT)
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
@@ -343,7 +404,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
                     count = count
                 };
 
-                return CommonJsonSend.Send<SearchPages_Data_Page>(accessToken, searchPageUrl, data, CommonJsonSendType.POST,
+                return CommonJsonSend.Send<SearchPagesResultJson>(accessToken, searchPageUrl, data, CommonJsonSendType.POST,
                     timeOut);
 
             }, accessTokenOrAppId);
@@ -362,7 +423,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/page/delete?access_token={0}", accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/page/delete?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -391,7 +452,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/device/bindpage?access_token={0}", accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/device/bindpage?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -402,6 +463,58 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
                 };
 
                 return CommonJsonSend.Send<WxJsonResult>(null, url, data, CommonJsonSendType.POST, timeOut);
+
+            }, accessTokenOrAppId);
+        }
+
+        /// <summary>
+        ///  查询设备的关联关系
+        /// </summary>
+        /// <param name="accessTokenOrAppId"></param>
+        /// <param name="deviceIdentifier">指定的设备</param>
+        /// <param name="timeOut"></param>
+        /// <returns></returns>
+        public static RelationSearchResultJson RelationSearch(string accessTokenOrAppId, DeviceApply_Data_Device_Identifiers deviceIdentifier, int timeOut = Config.TIME_OUT)
+        {
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+            {
+                var url = string.Format("https://api.weixin.qq.com/shakearound/relation/search?access_token={0}", accessToken.AsUrlData());
+
+                var data = new
+                {
+                    type=1,
+                    device_identifier = deviceIdentifier
+                };
+
+                return CommonJsonSend.Send<RelationSearchResultJson>(null, url, data, CommonJsonSendType.POST, timeOut);
+
+            }, accessTokenOrAppId);
+        }
+
+        /// <summary>
+        /// 查询页面的关联关系
+        /// </summary>
+        /// <param name="accessTokenOrAppId"></param>
+        /// <param name="pageId">指定的页面id</param>
+        /// <param name="begin">关联关系列表的起始索引值</param>
+        /// <param name="count">待查询的关联关系数量，不能超过50个</param>
+        /// <param name="timeOut"></param>
+        /// <returns></returns>
+        public static RelationSearchResultJson RelationSearch(string accessTokenOrAppId, long pageId, int begin, int count, int timeOut = Config.TIME_OUT)
+        {
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+            {
+                var url = string.Format("https://api.weixin.qq.com/shakearound/relation/search?access_token={0}", accessToken.AsUrlData());
+
+                var data = new
+                {
+                    type = 2,
+                    page_id = pageId,
+                    begin = begin,
+                    count = count
+                };
+
+                return CommonJsonSend.Send<RelationSearchResultJson>(null, url, data, CommonJsonSendType.POST, timeOut);
 
             }, accessTokenOrAppId);
         }
@@ -419,8 +532,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/user/getshakeinfo?access_token={0}",
-                    accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/user/getshakeinfo?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -450,8 +562,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/statistics/device?access_token={0}",
-                    accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/statistics/device?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {
@@ -480,8 +591,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs
         {
             return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var url = string.Format("https://api.weixin.qq.com/shakearound/statistics/page?access_token={0}",
-                    accessToken);
+                var url = string.Format("https://api.weixin.qq.com/shakearound/statistics/page?access_token={0}", accessToken.AsUrlData());
 
                 var data = new
                 {

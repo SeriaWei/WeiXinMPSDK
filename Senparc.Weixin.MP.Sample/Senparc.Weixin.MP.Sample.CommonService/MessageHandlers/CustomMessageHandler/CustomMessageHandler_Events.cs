@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2015 Senparc
+    Copyright (C) 2016 Senparc
     
     文件名：CustomMessageHandler_Events.cs
     文件功能描述：自定义MessageHandler
@@ -17,6 +17,7 @@ using Senparc.Weixin.Context;
 using Senparc.Weixin.MP.Entities;
 using Senparc.Weixin.MP.Helpers;
 using Senparc.Weixin.MP.MessageHandlers;
+using Senparc.Weixin.MP.Sample.CommonService.Download;
 using Senparc.Weixin.MP.Sample.CommonService.Utilities;
 
 namespace Senparc.Weixin.MP.Sample.CommonService.CustomMessageHandler
@@ -40,8 +41,24 @@ namespace Senparc.Weixin.MP.Sample.CommonService.CustomMessageHandler
 
 SDK官方地址：http://weixin.senparc.com
 源代码及Demo下载地址：https://github.com/JeffreySu/WeiXinMPSDK
-Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP",
+Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP
+
+===============
+更多有关第三方开放平台（Senparc.Weixin.Open）的内容，请回复文字：open
+",
                 version);
+        }
+
+        public string GetDownloadInfo(CodeRecord codeRecord)
+        {
+            return string.Format(@"您已通过二维码验证，浏览器即将开始下载 Senparc.Weixin SDK 帮助文档。
+当前选择的版本：v{0}
+
+我们期待您的意见和建议，客服热线：400-031-8816。
+
+感谢您对盛派网络的支持！
+
+© 2016 Senparc", codeRecord.Version);
         }
 
         public override IResponseMessageBase OnTextOrEventRequest(RequestMessageText requestMessage)
@@ -99,7 +116,7 @@ Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP",
                 case "SubClickRoot_Music":
                     {
                         //上传缩略图
-                        var accessToken = CommonAPIs.AccessTokenContainer.TryGetToken(appId, appSecret);
+                        var accessToken = CommonAPIs.AccessTokenContainer.TryGetAccessToken(appId, appSecret);
                         var uploadResult = AdvancedAPIs.MediaApi.UploadTemporaryMedia(accessToken, UploadMediaFileType.thumb,
                                                                      Server.GetMapPath("~/Images/Logo.jpg"));
                         //设置音乐信息
@@ -115,7 +132,7 @@ Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP",
                 case "SubClickRoot_Image":
                     {
                         //上传图片
-                        var accessToken = CommonAPIs.AccessTokenContainer.TryGetToken(appId, appSecret);
+                        var accessToken = CommonAPIs.AccessTokenContainer.TryGetAccessToken(appId, appSecret);
                         var uploadResult = AdvancedAPIs.MediaApi.UploadTemporaryMedia(accessToken, UploadMediaFileType.image,
                                                                      Server.GetMapPath("~/Images/Logo.jpg"));
                         //设置图片信息
@@ -181,6 +198,20 @@ Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP",
                         strongResponseMessage.Content = "您点击了【微信扫码】按钮。";
                     }
                     break;
+                case "ConditionalMenu_Male":
+                    {
+                        var strongResponseMessage = CreateResponseMessage<ResponseMessageText>();
+                        reponseMessage = strongResponseMessage;
+                        strongResponseMessage.Content = "您点击了个性化菜单按钮，您的微信性别设置为：男。";
+                    }
+                    break;
+                case "ConditionalMenu_Femle":
+                    {
+                        var strongResponseMessage = CreateResponseMessage<ResponseMessageText>();
+                        reponseMessage = strongResponseMessage;
+                        strongResponseMessage.Content = "您点击了个性化菜单按钮，您的微信性别设置为：女。";
+                    }
+                    break;
                 default:
                     {
                         var strongResponseMessage = CreateResponseMessage<ResponseMessageText>();
@@ -212,7 +243,28 @@ Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP",
         {
             //通过扫描关注
             var responseMessage = CreateResponseMessage<ResponseMessageText>();
-            responseMessage.Content = "通过扫描关注。";
+
+            //下载文档
+            if (!string.IsNullOrEmpty(requestMessage.EventKey))
+            {
+                var sceneId = long.Parse(requestMessage.EventKey.Replace("qrscene_", ""));
+                //var configHelper = new ConfigHelper(new HttpContextWrapper(HttpContext.Current));
+                var codeRecord =
+                    ConfigHelper.CodeCollection.Values.FirstOrDefault(z => z.QrCodeTicket != null && z.QrCodeId == sceneId);
+
+
+                if (codeRecord != null)
+                {
+                    //确认可以下载
+                    codeRecord.AllowDownload = true;
+                    responseMessage.Content = GetDownloadInfo(codeRecord);
+                }
+            }
+
+            responseMessage.Content = responseMessage.Content ?? string.Format("通过扫描二维码进入，场景值：{0}",requestMessage.EventKey);
+
+
+
             return responseMessage;
         }
 
@@ -239,6 +291,29 @@ Nuget地址：https://www.nuget.org/packages/Senparc.Weixin.MP",
         {
             var responseMessage = ResponseMessageBase.CreateFromRequestMessage<ResponseMessageText>(requestMessage);
             responseMessage.Content = GetWelcomeInfo();
+            if (!string.IsNullOrEmpty(requestMessage.EventKey))
+            {
+                responseMessage.Content += "\r\n============\r\n场景值：" + requestMessage.EventKey;
+            }
+
+            //推送消息
+            //下载文档
+            if (requestMessage.EventKey.StartsWith("qrscene_"))
+            {
+                var sceneId = long.Parse(requestMessage.EventKey.Replace("qrscene_", ""));
+                //var configHelper = new ConfigHelper(new HttpContextWrapper(HttpContext.Current));
+                var codeRecord =
+                    ConfigHelper.CodeCollection.Values.FirstOrDefault(z => z.QrCodeTicket != null && z.QrCodeId == sceneId);
+
+                if (codeRecord != null)
+                {
+                    //确认可以下载
+                    codeRecord.AllowDownload = true;
+                    AdvancedAPIs.CustomApi.SendText(null, WeixinOpenId, GetDownloadInfo(codeRecord));
+                }
+            }
+
+
             return responseMessage;
         }
 

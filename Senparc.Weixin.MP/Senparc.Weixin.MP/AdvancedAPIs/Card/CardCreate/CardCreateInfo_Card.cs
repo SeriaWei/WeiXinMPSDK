@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2015 Senparc
+    Copyright (C) 2016 Senparc
     
     文件名：CardCreateInfo_Card.cs
     文件功能描述：卡券信息数据中的card字段
@@ -14,11 +14,6 @@
     修改描述：添加会议门票
 ----------------------------------------------------------------*/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Senparc.Weixin.MP.AdvancedAPIs.Card
 {
     /// <summary>
@@ -26,7 +21,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.Card
     /// </summary>
     public class CardCreateInfo_Card
     {
-        public CardType card_type { get; set; }
+        public string card_type { get; set; }
     }
 
 
@@ -131,7 +126,12 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.Card
         /// <summary>
         /// 卡类型（不在Json数据中）
         /// </summary>
-        public CardType CardType { get; set; }
+        protected CardType CardType { get; set; }
+
+        public CardType GetCardType()
+        {
+            return CardType;
+        }
 
         public BaseCardInfo(CardType cardType)
         {

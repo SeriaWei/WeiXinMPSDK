@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Senparc.Weixin.Exceptions;
+using Senparc.Weixin.QY.AdvancedAPIs;
 using Senparc.Weixin.QY.AdvancedAPIs.Media;
 using Senparc.Weixin.QY.CommonAPIs;
 using Senparc.Weixin.QY.Test.CommonApis;
@@ -26,7 +27,7 @@ namespace Senparc.Weixin.QY.Test.AdvancedAPIs
             Assert.IsTrue(result.errcode == ReturnCode_QY.请求成功);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public string UploadImageTest()
         {
             string _media = "E:\\1.jpg";
@@ -64,6 +65,14 @@ namespace Senparc.Weixin.QY.Test.AdvancedAPIs
 
                 Assert.IsTrue(File.Exists(fileName));
             }
+        }
+
+        [TestMethod]
+        public void BatchGetMaterialTest()
+        {
+            var accessToken = AccessTokenContainer.GetToken(_corpId);
+            var result = MediaApi.BatchGetMaterial(accessToken, UploadMediaFileType.image, 0, 0, 50);
+            Assert.IsTrue(result.errcode == ReturnCode_QY.请求成功);
         }
     }
 }

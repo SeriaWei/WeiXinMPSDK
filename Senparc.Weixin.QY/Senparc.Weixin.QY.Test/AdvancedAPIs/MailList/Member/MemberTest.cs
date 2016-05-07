@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Senparc.Weixin.Exceptions;
+using Senparc.Weixin.QY.AdvancedAPIs;
 using Senparc.Weixin.QY.AdvancedAPIs.MailList;
 using Senparc.Weixin.QY.CommonAPIs;
 using Senparc.Weixin.QY.Test.CommonApis;
@@ -26,7 +27,7 @@ namespace Senparc.Weixin.QY.Test.AdvancedAPIs
                         }
             };
             var accessToken = AccessTokenContainer.GetToken(_corpId);
-            var result = MailListApi.CreateMember(accessToken, userId, "ceshi", new[] { 2 }, null, "18913536683", null, null, extattr);
+            var result = MailListApi.CreateMember(accessToken, userId, "ceshi", new[] { 2 }, null, "18913536683", null, null, null, extattr);
             Assert.IsNotNull(result);
             Assert.IsTrue(result.errcode == ReturnCode_QY.请求成功);
         }
@@ -89,7 +90,7 @@ namespace Senparc.Weixin.QY.Test.AdvancedAPIs
         public void InviteMemberTest(string userId)
         {
             var accessToken = AccessTokenContainer.GetToken(_corpId);
-            var result = MailListApi.InviteMember(accessToken, userId, "欢迎");
+            var result = MailListApi.InviteMember(accessToken, userId);
             Assert.IsNotNull(result);
             Assert.IsTrue(result.errcode == ReturnCode_QY.请求成功);
         }

@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2015 Senparc
+    Copyright (C) 2016 Senparc
     
     文件名：MediaApi.cs
     文件功能描述：多媒体文件接口
@@ -18,16 +18,15 @@
     接口详见：http://qydev.weixin.qq.com/wiki/index.php?title=%E7%AE%A1%E7%90%86%E5%A4%9A%E5%AA%92%E4%BD%93%E6%96%87%E4%BB%B6
  */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Senparc.Weixin.Entities;
+using Senparc.Weixin.HttpUtility;
+using Senparc.Weixin.QY.AdvancedAPIs.Media;
 using Senparc.Weixin.QY.CommonAPIs;
 using Senparc.Weixin.QY.Entities;
 
-namespace Senparc.Weixin.QY.AdvancedAPIs.Media
+namespace Senparc.Weixin.QY.AdvancedAPIs
 {
     /// <summary>
     /// 多媒体文件接口
@@ -44,10 +43,10 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         /// <returns></returns>
         public static UploadTemporaryResultJson Upload(string accessToken, UploadMediaFileType type, string media, int timeOut = Config.TIME_OUT)
         {
-            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={0}&type={1}", accessToken, type.ToString());
+            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={0}&type={1}", accessToken.AsUrlData(), type.ToString());
             var fileDictionary = new Dictionary<string, string>();
             fileDictionary["media"] = media;
-            return HttpUtility.Post.PostFileGetJson<UploadTemporaryResultJson>(url, null, fileDictionary, null, null, timeOut);
+            return Post.PostFileGetJson<UploadTemporaryResultJson>(url, null, fileDictionary, null, null, timeOut);
         }
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         public static void Get(string accessToken, string mediaId, Stream stream)
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/media/get?access_token={0}&media_id={1}",
-                accessToken, mediaId);
+                accessToken.AsUrlData(), mediaId.AsUrlData());
             HttpUtility.Get.Download(url, stream);//todo 异常处理
         }
 
@@ -74,7 +73,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         public static UploadForeverResultJson AddMpNews(string accessToken, int agentId, int timeOut = Config.TIME_OUT, params MpNewsArticle[] mpNewsArticles)
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/add_mpnews?access_token={0}",
-                accessToken);
+                accessToken.AsUrlData());
 
             var data = new
             {
@@ -99,10 +98,10 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         /// <returns></returns>
         public static UploadForeverResultJson AddMaterial(string accessToken, UploadMediaFileType type, int agentId, string media, int timeOut = Config.TIME_OUT)
         {
-            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/add_material?agentid={1}&type={2}&access_token={0}", accessToken, agentId, type);
+            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/add_material?agentid={1}&type={2}&access_token={0}", accessToken.AsUrlData(), agentId, type);
             var fileDictionary = new Dictionary<string, string>();
             fileDictionary["media"] = media;
-            return HttpUtility.Post.PostFileGetJson<UploadForeverResultJson>(url, null, fileDictionary, null, null, timeOut);
+            return Post.PostFileGetJson<UploadForeverResultJson>(url, null, fileDictionary, null, null, timeOut);
         }
 
         /// <summary>
@@ -117,7 +116,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
             var url =
                 string.Format(
                     "https://qyapi.weixin.qq.com/cgi-bin/material/get?access_token={0}&media_id={1}&agentid={2}",
-                    accessToken, mediaId, agentId);
+                    accessToken.AsUrlData(), mediaId.AsUrlData(), agentId);
 
             return CommonJsonSend.Send<GetForeverMpNewsResult>(null, url, null, CommonJsonSendType.GET);
         }
@@ -134,7 +133,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
             var url =
                 string.Format(
                     "https://qyapi.weixin.qq.com/cgi-bin/material/get?access_token={0}&media_id={1}&agentid={2}",
-                    accessToken, mediaId, agentId);
+                    accessToken.AsUrlData(), mediaId.AsUrlData(), agentId);
 
             HttpUtility.Get.Download(url, stream);//todo 异常处理
         }
@@ -151,7 +150,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
             var url =
                 string.Format(
                     "https://qyapi.weixin.qq.com/cgi-bin/material/del?access_token={0}&agentid={1}&media_id={2}}",
-                    accessToken, agentId, mediaId);
+                    accessToken.AsUrlData(), agentId, mediaId.AsUrlData());
 
             return CommonJsonSend.Send<QyJsonResult>(null, url, null, CommonJsonSendType.GET);
         }
@@ -168,7 +167,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         public static UploadForeverResultJson UpdateMpNews(string accessToken, string mediaId, int agentId, int timeOut = Config.TIME_OUT, params MpNewsArticle[] mpNewsArticles)
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/update_mpnews?access_token={0}",
-                accessToken);
+                accessToken.AsUrlData());
 
             var data = new
             {
@@ -192,7 +191,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         public static GetCountResult GetCount(string accessToken, int agentId)
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token={0}&agentid={1}",
-                accessToken, agentId);
+                accessToken.AsUrlData(), agentId);
 
             return CommonJsonSend.Send<GetCountResult>(null, url, null, CommonJsonSendType.GET);
         }
@@ -210,7 +209,7 @@ namespace Senparc.Weixin.QY.AdvancedAPIs.Media
         public static BatchGetMaterialResult BatchGetMaterial(string accessToken, UploadMediaFileType type, int agentId, int offset, int count, int timeOut = Config.TIME_OUT)
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token={0}",
-                accessToken);
+                accessToken.AsUrlData());
 
             var data = new
             {

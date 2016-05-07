@@ -1,23 +1,21 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2015 Senparc
-  
+    Copyright (C) 2016 Senparc
+
     文件名：Enums.cs
     文件功能描述：枚举类型
-    
-    
+
+
     创建标识：Senparc - 20150313
-    
+
     修改标识：Senparc - 20150313
     修改描述：整理接口
-    
+
     修改标识：Senparc - 20150507
     修改描述：添加 事件 异步任务完成事件推送 枚举类型
-----------------------------------------------------------------*/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+    修改标识：zeje - 20150507
+    修改描述：v3.3.5 添加Login_User_Type枚举
+----------------------------------------------------------------*/
 
 namespace Senparc.Weixin.QY
 {
@@ -158,7 +156,10 @@ namespace Senparc.Weixin.QY
         Image,
         Voice,
         Video,
-        MpNews
+        MpNews,
+
+        //以下类型为Senparc.Weixin自用类型
+        NoResponse
     }
 
     /// <summary>
@@ -366,4 +367,80 @@ namespace Senparc.Weixin.QY
     //    /// </summary>
     //    replace_party = 3,
     //}
+
+    /// <summary>
+    /// 群聊类型
+    /// </summary>
+    public enum Chat_Type
+    {
+        single = 0,
+        group = 1,
+    }
+
+    /// <summary>
+    /// 群聊发送消息类型
+    /// </summary>
+    public enum ChatMsgType
+    {
+        text = 0,
+        image = 1,
+        file = 2
+    }
+
+    /// <summary>
+    /// 免打扰状态
+    /// </summary>
+    public enum Mute_Status
+    {
+        关闭 = 0,
+        打开 = 1
+    }
+
+    /// <summary>
+    /// 客服消息用户类型
+    /// </summary>
+    public enum KF_User_Type
+    {
+        /// <summary>
+        /// 客服
+        /// </summary>
+        kf,
+        /// <summary>
+        /// 客户，企业员工userid
+        /// </summary>
+        userid,
+        /// <summary>
+        /// 客户，企业员工openid
+        /// </summary>
+        openid
+    }
+
+    /// <summary>
+    /// 客服类型
+    /// </summary>
+    public enum KF_Type
+    {
+        /// <summary>
+        /// 内部客服
+        /// </summary>
+        @internal,
+        /// <summary>
+        /// 外部客服
+        /// </summary>
+        external
+    }
+    /// <summary>redirect_uri支持登录的类型
+    /// </summary>
+    public enum Login_User_Type
+    {
+        /// <summary>成员登录
+        /// </summary>
+        member,
+        /// <summary>管理员登录
+        /// </summary>
+        admin,
+        /// <summary>成员或管理员皆可登录
+        /// </summary>
+        all
+    }
 }
